@@ -1,0 +1,22 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1534773155118.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "1633578188",
+    "id" : "A05A387A",
+    "lastKnownWriteTime" : 1534430038,
+    "last_content_update" : 1534430038,
+    "path" : "C:/Users/gasimmons/IdeaProjects/hadrianus/app.R",
+    "project_path" : "app.R",
+    "properties" : {
+        "cursorPosition" : "0,0",
+        "scrollLine" : "0"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}
