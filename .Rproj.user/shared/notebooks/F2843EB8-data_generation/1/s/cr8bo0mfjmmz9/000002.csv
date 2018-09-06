@@ -1,0 +1,5 @@
+"0","start_date <- ymd(""20140101"")"
+"0","end_date <- ymd(""20190101"")"
+"0","average_terms <- 30"
+"0","num_invoices_per_day <- 100"
+"0","company_codes <- seq(1010, 4350, by = 10)"

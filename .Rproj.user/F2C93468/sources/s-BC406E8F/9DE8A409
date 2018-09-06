@@ -1,0 +1,24 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1535021832662.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "9DE8A409",
+    "lastKnownWriteTime" : 1535022615,
+    "last_content_update" : 1535022615048,
+    "path" : "C:/Users/gasimmons/IdeaProjects/hadrianus/data_generation.Rmd",
+    "project_path" : "data_generation.Rmd",
+    "properties" : {
+        "chunk_output_type" : "inline",
+        "cursorPosition" : "32,0",
+        "scrollLine" : "0",
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_markdown"
+}
