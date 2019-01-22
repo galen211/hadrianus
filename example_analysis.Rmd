@@ -1,0 +1,17 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+source("load_packages.R")
+```
+
+```{r}
+xes <- read_xes(xesfile = "environmental_permit.xes")
+```
+
+```{r}
+xes %>% process_map(rankdir = "TB")
+```
+
