@@ -1,0 +1,12 @@
+name: hadrianus
+title: hadrianus
+username:
+account: pelican
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 765274
+bundleId: 1917341
+url: https://pelican.shinyapps.io/hadrianus/
+when: 1551802327.51347
+asMultiple: FALSE
+asStatic: FALSE

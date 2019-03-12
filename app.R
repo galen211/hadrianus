@@ -1,11 +1,19 @@
 ## app.R ##
 library(shiny)
 library(shinydashboard)
+library(bupaR)
+library(eventdataR)
+library(xesreadR)
+library(edeaR)
+library(processmapR)
+library(processmonitR)
+library(dplyr)
+library(stringr)
+library(readr)
+library(lubridate)
+library(DiagrammeR)
 
-source("load_packages.R")
-
-# ev <- read_xes("data/refund_process.xes")
-load("ev")
+ev <- eventdataR::patients
 
 # Eventlog filter
 {
@@ -13,7 +21,7 @@ load("ev")
   numericInput(
     "pct_variant",
     "Percentage of Variants",
-    value = 0.1,
+    value = 1,
     min = 0,
     max = 1,
     step = 0.1,
@@ -23,16 +31,18 @@ load("ev")
   dateRangeInput(
     "date_range",
     "Date Interval",
-    start = min(as_date(ev$timestamp)),
-    end = max(as_date(ev$timestamp)),
-    min = min(as_date(ev$timestamp)),
-    max = max(as_date(ev$timestamp))
+    start = min(as_date(ev$time)),
+    end = max(as_date(ev$time)),
+    min = min(as_date(ev$time)),
+    max = max(as_date(ev$time))
   ),
   selectInput("interval_filter",
               "Interval Method",
               choices = 
                 c("contained","start","complete","intersecting","trim"),
               selected = "contained"),
+  textOutput("filter_explanation", container = div),
+  br(),
   sliderInput(
     "throughput_time",
     "Throughput Time",
@@ -42,8 +52,6 @@ load("ev")
     step = 1,
     width = "100%"
   ),
-  textOutput("filter_explanation", container = div),
-  br(),
   actionButton("update", "Update Filter")
 )
 }
@@ -62,8 +70,8 @@ sidebar <- dashboardSidebar(
       icon = icon("sitemap", lib = "font-awesome")
     ),
     menuItem(
-      "Precedence Analysis",
-      tabName = "precedence_analysis",
+      "Precedence Matrix",
+      tabName = "precedence_matrix",
       icon = icon("table", lib = "font-awesome")
     ),
     menuItem(
@@ -94,12 +102,7 @@ sidebar <- dashboardSidebar(
 {
   body <- dashboardBody(
     tags$head(tags$style(
-      HTML(
-        '/* logo background */
-        .skin-purple .main-header .logo {
-        background-color: #c4c2c6;
-        }
-        
+      HTML('
         /* body */
         .content-wrapper, .right-side {
         background-color: #ffffff;
@@ -109,12 +112,14 @@ sidebar <- dashboardSidebar(
   tabItems(
     tabItem(
       tabName = "eventlog_filter",
-      h5("Eventlog Filter"),
+      h3("Event Log Filter"),
       filter
     ),
     tabItem(
       tabName = "process_map",
-      h5("Process Map"),
+      h3("Process Map"),
+      h5("By default, the process map is annotated with frequencies of activities and flows. This is what is called the frequency profile, and can be created explicitly using the frequency function. This function has a value argument, which can be used to adjust the frequencies shown, for instance using relative frequencies instead of the default absolute ones."),
+      br(),
       selectInput(
         "rank_dir",
         "Graph Orientation",
@@ -125,7 +130,7 @@ sidebar <- dashboardSidebar(
             "Bottom-Top" = "BT",
             "Right-Left" = "RL"
           ),
-        selected = "TB",
+        selected = "LR",
         width = "25%"
       ),
       selectInput("graph_type",
@@ -141,28 +146,48 @@ sidebar <- dashboardSidebar(
       grVizOutput(outputId = "plt_process_map")
     ),
     tabItem(
-      tabName = "precedence_analysis",
-      h5("Precedence Analysis"),
-      plotOutput(outputId = "plt_precedence_analysis")
+      tabName = "precedence_matrix",
+      h3("Precedence Matrix"),
+      h5("The Precedence Matrix shows how activities are followed by each other."),
+      br(),
+      selectInput("graph_type",
+                  "Graph Type",
+                  choices = c(
+                    "Absolute Frequency" = "absolute",
+                    "Relative Frequency" = "relative",
+                    "Absolute Case Frequency" = "absolute_case",
+                    "Relative Case Frequency" = "relative_case"
+                  ),
+                  selected = "absolute",
+                  width = "25%"),
+      plotOutput(outputId = "plt_precedence_matrix")
     ),
     tabItem(
       tabName = "trace_explorer",
-      h5("Trace Explorer"),
+      h3("Trace Explorer"),
+      h5("The trace explorer shows process traces, giving the user the ability to identify the most common (or least common) process traces."),
+      br(),
       plotOutput(outputId = "plt_trace_explorer")
     ),
     tabItem(
       tabName = "dot_plot",
-      h5("Dot Plot"),
+      h3("Dot Plot"),
+      h5("The dot plot shows events as dots and can be used to identify resource bottlenecks"),
+      br(),
       plotOutput(outputId = "plt_dot_plot")
     ),
     tabItem(
       tabName = "resource_map",
-      h5("Resource Map"),
+      h3("Resource Map"),
+      h5("The resource map shows the hand-offs between resources.  This chart can be used to understand resource processing time and the frequnecy of hand-offs."),
+      br(),
       grVizOutput(outputId = "plt_resource_map")
     ),
     tabItem(
       tabName = "resource_matrix",
-      h5("Resource Matrix"),
+      h3("Resource Matrix"),
+      h5("The resource matrix shows "),
+      br(),
       plotOutput(outputId = "plt_resource_matrix")
     )
   )
@@ -171,7 +196,7 @@ sidebar <- dashboardSidebar(
 
 # Ui Component
 {ui <- dashboardPage(dashboardHeader(
-  title = img(src = "pymetrics.png", height = "20"),
+  title = "Deloitte",
   dropdownMenu(
     type = "tasks",
     badgeStatus = "success",
@@ -188,7 +213,7 @@ sidebar <- dashboardSidebar(
 ),
 sidebar,
 body,
-skin = "purple")
+skin = "black")
 }
 
 # Server Component
@@ -208,7 +233,7 @@ server <- function(input, output) {
       input$interval_filter == "intersecting" ~ "All the events related to cases in which at least one event started and/or ended in the time period",
       input$interval_filter == "trim" ~ "All the events which started and ended in the time frame"
     )
-    paste("Selected Filter Criteria: ", explanation)
+    paste("Interval Selection Criteria: ", explanation)
   })
   
   output$plt_process_map <- renderGrViz({
@@ -216,7 +241,7 @@ server <- function(input, output) {
       process_map(rankdir = input$rank_dir, type = frequency(input$graph_type))
   })
   
-  output$plt_precedence_analysis <- renderPlot({
+  output$plt_precedence_matrix <- renderPlot({
     fl() %>%
       precedence_matrix() %>%
       plot()
