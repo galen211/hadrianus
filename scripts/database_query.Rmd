@@ -1,0 +1,78 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dbplyr)
+library(dplyr)
+library(readr)
+library(readxl)
+```
+
+
+```{r}
+sample_file <- file.path("../data/DE1_0_2008_to_2010_Inpatient_Claims_Sample_1.csv")
+
+df <- read_csv(file = sample_file, col_types = cols(.default = "c")) 
+```
+
+```{r}
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+lds <- copy_to(con, df)
+```
+
+Franciscan Missionaries of Our Lady Health System - NPI numbers
+```{r}
+npi <- c(
+  "1811429285",
+  "1730136771",
+  "1841544194",
+  "1801309133"
+)
+```
+
+Hip and Knee replacement icd9 codes
+```{r}
+icd_pcdr_codes <- c("0070", "0071", "0072", "0073", "0074", "0075", "0076", "0077", "0085", "0086", "0087", "7975", "7985", "8005", "8015", "8025", "8035", "8045", "8075", "8085", "8095", "8121", "8140", "8151", "8152", "8153", "8312", "8418", "8826", "0080", "0081", "0082", "0083", "0084", "7976", "7986", "8006", "8016", "8026", "8036", "8046", "806", "8076", "8086", "8096", "8122", "8142", "8143", "8147", "8154", "8155", "8415", "8416", "8417", "8445", "8446", "8827")
+```
+
+Translation of icd9 codes to icd10
+```{r}
+translation_file <- file.path("../data/icd10_pcs_codes_2017/icd9_icd10_translation.xlsx")
+
+trl <- read_excel(path = translation_file)
+```
+
+```{r}
+target_codes <- trl %>%
+  filter(ICD9 %in% icd_pcdr_codes) %>%
+  select(ICD10) %>%
+  unique()
+```
+
+
+```{r}
+lds %>%
+  filter(PRVDR_NUM %in% npi & ICD9_PRCDR_CD_1 %in% ICD9_DGNS_CD_1) %>%
+  show_query()
+```
+
+
+```{r}
+lds %>%
+  filter(DESYNPUF_ID %in% c("patient")) %>%
+  show_query()
+```
+
+```{r}
+translate_sql(ndf <- df %>%
+  filter(any(ICD10_PRCDR_CD_1 %in% target_codes)) %>%
+  group_by(DESYNPUF_ID) %>%
+  summarize(ct = n()))
+```
+```{r}
+c
+
+```
+

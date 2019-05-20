@@ -1,0 +1,47 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(readr)
+library(dplyr)
+```
+
+
+```{r}
+list.files(path = "single_sample/", pattern = ".csv")
+```
+
+```{r}
+de1_inpatient <- read_csv(file = "single_sample/DE1_0_2008_to_2010_Inpatient_Claims_Sample_17.csv")
+```
+
+```{r}
+inpatient_beneficiaries <- de1_inpatient %>% select(DESYNPUF_ID) %>% unique() %>% as_vector()
+```
+
+```{r}
+de1_outpatient <- read_csv(file = "single_sample/DE1_0_2008_to_2010_Outpatient_Claims_Sample_17.csv") 
+```
+
+```{r}
+common_cols <- intersect(colnames(de1_outpatient),colnames(de1_inpatient))
+```
+
+```{r}
+de1_inpatient <- de1_inpatient %>%
+  select(common_cols) %>%
+  mutate("CLM_TYPE" = "Inpatient") 
+
+de1_outpatient <- de1_outpatient %>%
+  select(common_cols) %>%
+  mutate("CLM_TYPE" = "Inpatient") 
+```
+
+
+```{r}
+df <- de1_outpatient %>% filter(DESYNPUF_ID %in% inpatient_beneficiaries) %>%
+  rbind(de1_inpatient)
+```
+

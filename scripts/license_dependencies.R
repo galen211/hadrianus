@@ -2,7 +2,7 @@ library(readr)
 library(tools)
 
 # get license dependencies
-tags <- c(
+pkg.used <- c(
   "shiny",
   "shinydashboard",
   "bupaR",
@@ -15,12 +15,9 @@ tags <- c(
   "stringr",
   "readr",
   "lubridate",
-  "DiagrammeR",
+  "DiagrammeR"
   )
 
-d <- package_dependencies(packages = tags, which = c("Depends"))
+pkg.installed <- installed.packages() %>% as.data.frame()
 
-
-dg <- makeDepGraph(tags, enhances = TRUE, availPkgs = cranJuly2014)
-set.seed(1)
-plot(dg, legendPosition = c(-1, -1), vertex.size = 10, cex = 0.7)
+df <- p

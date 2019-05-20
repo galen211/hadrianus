@@ -1,0 +1,162 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(dbplyr)
+library(dplyr)
+library(readr)
+library(readxl)
+library(processmapR)
+library(bupaR)
+library(lubridate)
+library(tidyr)
+library(stringr)
+library(purrr)
+```
+
+
+```{r}
+sample_file <- file.path("../single_sample/DE1_0_2008_to_2010_Outpatient_Claims_Sample_17.csv")
+
+df <- read_csv(file = sample_file, 
+                         col_types = cols(
+                                          DESYNPUF_ID = col_character(),
+                                          CLM_ID = col_character(),
+                                          SEGMENT = col_skip(),
+                                          CLM_FROM_DT = col_date(format = "%Y%m%d"),
+                                          CLM_THRU_DT = col_skip(),
+                                          PRVDR_NUM = col_character(),
+                                          CLM_PMT_AMT = col_double(),
+                                          NCH_PRMRY_PYR_CLM_PD_AMT = col_skip(),
+                                          AT_PHYSN_NPI = col_skip(),
+                                          OP_PHYSN_NPI = col_skip(),
+                                          OT_PHYSN_NPI = col_skip(),
+                                          NCH_BENE_BLOOD_DDCTBL_LBLTY_AM = col_skip(),
+                                          ICD9_DGNS_CD_1 = col_character(),
+                                          ICD9_DGNS_CD_2 = col_character(),
+                                          ICD9_DGNS_CD_3 = col_character(),
+                                          ICD9_DGNS_CD_4 = col_character(),
+                                          ICD9_DGNS_CD_5 = col_character(),
+                                          ICD9_DGNS_CD_6 = col_character(),
+                                          ICD9_DGNS_CD_7 = col_character(),
+                                          ICD9_DGNS_CD_8 = col_character(),
+                                          ICD9_DGNS_CD_9 = col_character(),
+                                          ICD9_DGNS_CD_10 = col_character(),
+                                          ICD9_PRCDR_CD_1 = col_character(),
+                                          ICD9_PRCDR_CD_2 = col_character(),
+                                          ICD9_PRCDR_CD_3 = col_character(),
+                                          ICD9_PRCDR_CD_4 = col_character(),
+                                          ICD9_PRCDR_CD_5 = col_character(),
+                                          ICD9_PRCDR_CD_6 = col_character(),
+                                          NCH_BENE_PTB_DDCTBL_AMT = col_skip(),
+                                          NCH_BENE_PTB_COINSRNC_AMT = col_skip(),
+                                          ADMTNG_ICD9_DGNS_CD = col_skip(),
+                                          HCPCS_CD_1 = col_skip(),
+                                          HCPCS_CD_2 = col_skip(),
+                                          HCPCS_CD_3 = col_skip(),
+                                          HCPCS_CD_4 = col_skip(),
+                                          HCPCS_CD_5 = col_skip(),
+                                          HCPCS_CD_6 = col_skip(),
+                                          HCPCS_CD_7 = col_skip(),
+                                          HCPCS_CD_8 = col_skip(),
+                                          HCPCS_CD_9 = col_skip(),
+                                          HCPCS_CD_10 = col_skip(),
+                                          HCPCS_CD_11 = col_skip(),
+                                          HCPCS_CD_12 = col_skip(),
+                                          HCPCS_CD_13 = col_skip(),
+                                          HCPCS_CD_14 = col_skip(),
+                                          HCPCS_CD_15 = col_skip(),
+                                          HCPCS_CD_16 = col_skip(),
+                                          HCPCS_CD_17 = col_skip(),
+                                          HCPCS_CD_18 = col_skip(),
+                                          HCPCS_CD_19 = col_skip(),
+                                          HCPCS_CD_20 = col_skip(),
+                                          HCPCS_CD_21 = col_skip(),
+                                          HCPCS_CD_22 = col_skip(),
+                                          HCPCS_CD_23 = col_skip(),
+                                          HCPCS_CD_24 = col_skip(),
+                                          HCPCS_CD_25 = col_skip(),
+                                          HCPCS_CD_26 = col_skip(),
+                                          HCPCS_CD_27 = col_skip(),
+                                          HCPCS_CD_28 = col_skip(),
+                                          HCPCS_CD_29 = col_skip(),
+                                          HCPCS_CD_30 = col_skip(),
+                                          HCPCS_CD_31 = col_skip(),
+                                          HCPCS_CD_32 = col_skip(),
+                                          HCPCS_CD_33 = col_skip(),
+                                          HCPCS_CD_34 = col_skip(),
+                                          HCPCS_CD_35 = col_skip(),
+                                          HCPCS_CD_36 = col_skip(),
+                                          HCPCS_CD_37 = col_skip(),
+                                          HCPCS_CD_38 = col_skip(),
+                                          HCPCS_CD_39 = col_skip(),
+                                          HCPCS_CD_40 = col_skip(),
+                                          HCPCS_CD_41 = col_skip(),
+                                          HCPCS_CD_42 = col_skip(),
+                                          HCPCS_CD_43 = col_skip(),
+                                          HCPCS_CD_44 = col_skip(),
+                                          HCPCS_CD_45 = col_skip()
+                                        )
+)
+```
+Reshape the procedure and diagnosis codes
+```{r}
+ndf <- df %>%
+  gather(key = "procedure_code_level", value = "procedure_code", starts_with("ICD9_PRCDR")) %>%
+  gather(key = "diagnosis_code_level", value = "diagnosis_code", starts_with("ICD9_DGNS"))
+
+```
+
+
+ICD9 Codes
+```{r}
+file_icd9_pcdr <- file.path("../single_sample/V26  I-9 Procedures.txt")
+file_icd9_dgns <- file.path("../single_sample/V26 I-9 Diagnosis.txt")
+
+icd9_pcdr <- read_csv()
+
+```
+
+
+Descriptions - read all codes
+```{r}
+# code_files <- list.files(path = "../data/icd9_pcs_codes/", pattern = ".xls", full.names = TRUE)
+# 
+# des <- code_files %>%
+#   map(read_excel, skip = 1, col_names = c("PRCDR_CODE","PRCDR_DES_LG","PRCDR_DES_SH")) %>%
+#   reduce(rbind)
+```
+
+Read only procedures
+```{r}
+des <- read_excel(path = "../data/icd9_pcs_codes/CMS27_DESC_LONG_SHORT_SG_092709.xls", col_names = c("PRCDR_CODE","PRCDR_DES_LG","PRCDR_DES_SH"))
+```
+
+
+Event Log Creation
+```{r}
+ndf <- df %>% 
+  mutate_at(vars(ends_with("_DT")), as_date) %>%
+  gather(key = "PRCDR_ORDER", value = "PRCDR_CODE", starts_with("ICD9_PRCDR_CD_")) %>%
+  filter(!is.na(PRCDR_CODE)) %>%
+  left_join(des, by = c("PRCDR_CODE" = "PRCDR_CODE")) %>%
+  arrange(DESYNPUF_ID,PRCDR_ORDER) %>%
+  select(DESYNPUF_ID, ADMTNG_ICD9_DGNS_CD, PRVDR_NUM, CLM_FROM_DT, PRCDR_ORDER, PRCDR_CODE, PRCDR_DES_LG) %>%
+  mutate(PRCDR_ORDER = str_extract(PRCDR_ORDER, pattern = "\\d$"),
+         STATUS = "Complete",
+         ACTIVITY_INSTANCE = 1:nrow(.),
+         PRCDR = str_c(PRCDR_CODE," - ", PRCDR_DES_LG))
+```
+
+```{r}
+ev <- 
+  eventlog(ndf, 
+           case_id = "DESYNPUF_ID", 
+           activity_id = "PRCDR", 
+           activity_instance_id = "ACTIVITY_INSTANCE", 
+           lifecycle_id = "STATUS", 
+           resource_id = "PRVDR_NUM", 
+           timestamp = "CLM_FROM_DT")
+```
