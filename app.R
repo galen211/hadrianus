@@ -83,17 +83,18 @@ sidebar <- dashboardSidebar(
       "Dot Plot",
       tabName = "dot_plot",
       icon = icon("chart-bar", lib = "font-awesome")
-    ),
-    menuItem(
-      "Resource Map",
-      tabName = "resource_map",
-      icon = icon("map-marked", lib = "font-awesome")
-    ),
-    menuItem(
-      "Resource Matrix",
-      tabName = "resource_matrix",
-      icon = icon("database", lib = "font-awesome")
     )
+    # ,
+    # menuItem(
+    #   "Resource Map",
+    #   tabName = "resource_map",
+    #   icon = icon("map-marked", lib = "font-awesome")
+    # ),
+    # menuItem(
+    #   "Resource Matrix",
+    #   tabName = "resource_matrix",
+    #   icon = icon("database", lib = "font-awesome")
+    # )
   )
   )# icons at https://fontawesome.com/icons?d=gallery&q=list)
 }
@@ -113,12 +114,13 @@ sidebar <- dashboardSidebar(
     tabItem(
       tabName = "eventlog_filter",
       h3("Event Log Filter"),
+      h5("Leave the below settings unchanged to run the default example, which is referenced in explanations of each dashboard tab."),
       filter
     ),
     tabItem(
       tabName = "process_map",
       h3("Process Map"),
-      h5("By default, the process map is annotated with frequencies of activities and flows. This is what is called the frequency profile, and can be created explicitly using the frequency function. This function has a value argument, which can be used to adjust the frequencies shown, for instance using relative frequencies instead of the default absolute ones."),
+      h5("A process map shows the steps a process can take from the start of the process until the end of the process.  For every completed process, all the steps taken are represented by nodes on the process map.  Processes are defined by a set of common steps, but these steps may occur in different sequences, and sometimes missing steps, extra steps, or steps occurring in the wrong sequence can be interpreted as process variants that should be standardized.  The nodes in the process graph can display different types of information about the underlying step.  For example, if we are analyzing 497 cases of a process, we would expect the \"start\" node to display the absolute frequency of cases passing through that step.  Since there are no predecessors to the \"start\" step (i.e. every cases starts with the \"start\" step), there should be 497 cases.  Process maps can also be annotated with different measures associated with process execution such as time elapsed between steps."),
       br(),
       selectInput(
         "rank_dir",
@@ -148,55 +150,56 @@ sidebar <- dashboardSidebar(
     tabItem(
       tabName = "precedence_matrix",
       h3("Precedence Matrix"),
-      h5("The Precedence Matrix shows how activities are followed by each other."),
+      h5("A precedence matrix shows the before-after relationship between different steps in a process.  It can be used to answer questions like \"how often does a blood test occur before an MRI\" (answer: in 236 out of 497 cases)."),
       br(),
-      selectInput("graph_type",
-                  "Graph Type",
-                  choices = c(
-                    "Absolute Frequency" = "absolute",
-                    "Relative Frequency" = "relative",
-                    "Absolute Case Frequency" = "absolute_case",
-                    "Relative Case Frequency" = "relative_case"
-                  ),
-                  selected = "absolute",
-                  width = "25%"),
+      # selectInput("graph_type",
+      #             "Graph Type",
+      #             choices = c(
+      #               "Absolute Frequency" = "absolute",
+      #               "Relative Frequency" = "relative",
+      #               "Absolute Case Frequency" = "absolute_case",
+      #               "Relative Case Frequency" = "relative_case"
+      #             ),
+      #             selected = "absolute",
+      #             width = "25%"),
       plotOutput(outputId = "plt_precedence_matrix")
     ),
     tabItem(
       tabName = "trace_explorer",
       h3("Trace Explorer"),
-      h5("The trace explorer shows process traces, giving the user the ability to identify the most common (or least common) process traces."),
+      h5("The trace explorer shows the most common process variants.  In the default example below, there is only one variant, which is the process variant Start -> Registration -> Triage and Assessment -> X-Ray -> Discuss Results -> Check Out.  This process variant occurs in 258 out of 497 cases (51.91%) in the default example.  Usually the most frequently executed process variant represents the \"ideal process\", but assuming this were the case, 48.09% of the times this process is executed do not follow the ideal path!"),
       br(),
       plotOutput(outputId = "plt_trace_explorer")
     ),
     tabItem(
       tabName = "dot_plot",
       h3("Dot Plot"),
-      h5("The dot plot shows events as dots and can be used to identify resource bottlenecks"),
+      h5("The dot plot is intended to show elapsed time between resource hand-offs.  In this default example, resource 7 (r7) handles the  case last in most cases.  If we look at cases with the longest elapsed time, we can see that r2-r6 become scattered the longer a case takes.  By looking at time elapsed between resource hand-offs, we can identify if a resource is creating a bottleneck in a process."),
       br(),
       plotOutput(outputId = "plt_dot_plot")
-    ),
-    tabItem(
-      tabName = "resource_map",
-      h3("Resource Map"),
-      h5("The resource map shows the hand-offs between resources.  This chart can be used to understand resource processing time and the frequnecy of hand-offs."),
-      br(),
-      grVizOutput(outputId = "plt_resource_map")
-    ),
-    tabItem(
-      tabName = "resource_matrix",
-      h3("Resource Matrix"),
-      h5("The resource matrix shows "),
-      br(),
-      plotOutput(outputId = "plt_resource_matrix")
     )
+    # ,
+    # tabItem(
+    #   tabName = "resource_map",
+    #   h3("Resource Map"),
+    #   h5("The resource map shows the hand-offs between resources.  This chart can be used to understand resource processing time and the frequnecy of hand-offs."),
+    #   br(),
+    #   grVizOutput(outputId = "plt_resource_map")
+    # ),
+    # tabItem(
+    #   tabName = "resource_matrix",
+    #   h3("Resource Matrix"),
+    #   h5("The resource matrix shows "),
+    #   br(),
+    #   plotOutput(outputId = "plt_resource_matrix")
+    # )
   )
       )
   }
 
 # Ui Component
 {ui <- dashboardPage(dashboardHeader(
-  title = "Deloitte",
+  title = "Process Mining",
   dropdownMenu(
     type = "tasks",
     badgeStatus = "success",
@@ -257,16 +260,16 @@ server <- function(input, output) {
       dotted_chart(x = "relative", y = "duration", color = "employee")
   })
   
-  output$plt_resource_map <- renderGrViz({
-    fl() %>%
-      resource_map()
-  })
-  
-  output$plt_resource_matrix <- renderPlot({
-    fl() %>% 
-      resource_matrix() %>%
-      plot()
-  })
+  # output$plt_resource_map <- renderGrViz({
+  #   fl() %>%
+  #     resource_map()
+  # })
+  # 
+  # output$plt_resource_matrix <- renderPlot({
+  #   fl() %>% 
+  #     resource_matrix() %>%
+  #     plot()
+  # })
   
 } # end server
 
